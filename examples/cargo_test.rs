@@ -1,7 +1,8 @@
-use cargo_tokio_ci::process::ProcessBuilder;
-
+use cargo_tokio_ci::cli::TokioCIStageBuilder;
 fn main() {
-    let pb = ProcessBuilder::new("cargo", &["test", "--features", "full"]);
-    let mut process = pb.build();
-    process.run().unwrap();
+    let mut tokio_stage = TokioCIStageBuilder::new("cargo")
+        .test_all_features_full()
+        .build();
+
+    tokio_stage.run().unwrap();
 }
