@@ -133,8 +133,7 @@ impl TokioCIStep {
                 .build(),
         );
 
-        let mut step = Self { stages: q };
-        step.run()
+        Self::from(q).run()
     }
 
     pub fn test_unstable() -> Result<()> {
@@ -145,8 +144,7 @@ impl TokioCIStep {
                 .build(),
         );
 
-        let mut step = Self { stages: q };
-        step.run()
+        Self::from(q).run()
     }
 
     fn run(&mut self) -> Result<()> {
@@ -154,5 +152,11 @@ impl TokioCIStep {
             stage.run()?
         }
         Ok(())
+    }
+}
+
+impl From<VecDeque<TokioCIStage>> for TokioCIStep {
+    fn from(q: VecDeque<TokioCIStage>) -> Self {
+        Self { stages: q }
     }
 }
