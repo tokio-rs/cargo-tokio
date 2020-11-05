@@ -1,4 +1,6 @@
-pub mod cli;
+mod ci;
+
+pub use ci::{TokioCIStageBuilder, TokioCIStep};
 
 #[cfg(test)]
 mod tests {

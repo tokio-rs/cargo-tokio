@@ -1,7 +1,13 @@
-use cargo_tokio_ci::cli::TokioCIStageBuilder;
+use cargo_tokio_ci::{TokioCIStageBuilder, TokioCIStep};
 fn main() {
-    let mut tokio_stage = TokioCIStageBuilder::new("cargo")
-        .test_features_full()
-        .build();
-    tokio_stage.run().unwrap();
+    TokioCIStep::test_tokio_full().unwrap();
+    // let script = r#"
+    // set -e
+    // rustup override set nightly
+    // rustup component add miri
+    // cargo +nightly miri setup
+    // "#
+    // //&& rm -rf tokio/tests
+    // .trim_start()
+    // .trim_end();
 }

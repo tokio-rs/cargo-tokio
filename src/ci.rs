@@ -3,7 +3,14 @@ use std::{
     process::Command,
 };
 
+#[derive(PartialEq)]
+enum ToolChain {
+    Stable,
+    Nightly,
+}
+
 pub struct TokioCIStep {
+    toolchain: ToolChain,
     stages: VecDeque<TokioCIStage>,
 }
 pub struct TokioCIStage {
@@ -87,6 +94,19 @@ impl TokioCIStageBuilder {
             .envs(vec![("RUSTFLAGS", "--cfg tokio_unstable -Dwarnings")])
     }
 
+    // end of `test tokio full --unstable`
+
+    // start miri
+    pub fn miri(self) -> Self {
+        self.current_dir("tokio").args(vec![
+            "miri",
+            "test",
+            "--features",
+            "rt,rt-multi-thread,sync",
+            "task",
+        ])
+    }
+
     pub fn build(self) -> TokioCIStage {
         let cmd = self.cmd;
         TokioCIStage { cmd }
@@ -97,6 +117,17 @@ impl TokioCIStage {
         let mut child = self.cmd.spawn()?;
         child.wait()?;
         Ok(())
+    }
+
+    pub fn envs<I, K, V>(self, envs: I) -> Self
+    where
+        I: IntoIterator<Item = (K, V)>,
+        K: AsRef<OsStr>,
+        V: AsRef<OsStr>,
+    {
+        let mut new_self = self;
+        new_self.cmd.envs(envs);
+        new_self
     }
 }
 
@@ -133,7 +164,7 @@ impl TokioCIStep {
                 .build(),
         );
 
-        Self::from(q).run()
+        Self::from((q, ToolChain::Stable)).run()
     }
 
     pub fn test_unstable() -> Result<()> {
@@ -144,10 +175,30 @@ impl TokioCIStep {
                 .build(),
         );
 
-        Self::from(q).run()
+        Self::from((q, ToolChain::Stable)).run()
+    }
+
+    pub fn miri() -> Result<()> {
+        let mut q = VecDeque::new();
+        q.push_back(TokioCIStageBuilder::new("cargo").miri().build());
+        Self::from((q, ToolChain::Nightly)).run()
+    }
+
+    fn setup_toolchain(&self) -> Result<()> {
+        let script = match self.toolchain {
+            ToolChain::Nightly => "rustup override set nightly",
+            ToolChain::Stable => "rustup override set stable",
+        };
+
+        std::process::Command::new("sh")
+            .arg("-c")
+            .arg(script)
+            .spawn()?;
+        Ok(())
     }
 
     fn run(&mut self) -> Result<()> {
+        self.setup_toolchain()?;
         while let Some(mut stage) = self.stages.pop_front() {
             stage.run()?
         }
@@ -155,8 +206,11 @@ impl TokioCIStep {
     }
 }
 
-impl From<VecDeque<TokioCIStage>> for TokioCIStep {
-    fn from(q: VecDeque<TokioCIStage>) -> Self {
-        Self { stages: q }
+impl From<(VecDeque<TokioCIStage>, ToolChain)> for TokioCIStep {
+    fn from(tpl: (VecDeque<TokioCIStage>, ToolChain)) -> Self {
+        Self {
+            stages: tpl.0,
+            toolchain: tpl.1,
+        }
     }
 }
