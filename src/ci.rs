@@ -5,7 +5,7 @@ use std::{
 
 use crate::targets::Target;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Copy, Clone)]
 enum ToolChain {
     Stable,
     Nightly,
@@ -131,10 +131,6 @@ impl TokioCIStageBuilder {
 
     fn cross(self, target: Target) -> Self {
         self.args(vec!["check", "--workspace", "--target", target.into()])
-            .envs(vec![
-                ("RUSTFLAGS", "-Z sanitizer=address"),
-                ("ASAN_OPTIONS", "detect_leaks=0"),
-            ])
     }
 
     pub(crate) fn features_check_each_feature(self) -> Self {
@@ -371,18 +367,11 @@ impl TokioCIStep {
         Self::from((q, ToolChain::Stable)).run()
     }
 
-    fn setup_toolchain(&self) -> Result<()> {
-        let script = match self.toolchain {
-            ToolChain::Nightly => "rustup override set nightly",
-            ToolChain::Stable => "rustup override set stable",
-        };
-
-        // TODO: dooes Windows need to be managed differently?
-        std::process::Command::new("sh")
-            .arg("-c")
-            .arg(script)
-            .spawn()?
-            .wait()?;
+    fn setup_toolchain(&mut self) -> Result<()> {
+        let toolchain = self.toolchain;
+        for stage in &mut self.stages {
+            stage.cmd.envs(vec![("RUSTUP_TOOLCHAIN", String::from(toolchain))]);
+        }
         Ok(())
     }
 
@@ -400,6 +389,15 @@ impl From<(VecDeque<TokioCIStage>, ToolChain)> for TokioCIStep {
         Self {
             stages: tpl.0,
             toolchain: tpl.1,
+        }
+    }
+}
+
+impl From<ToolChain> for String {
+    fn from(tc: ToolChain) -> String {
+        match tc {
+            ToolChain::Stable => "stable".to_string(),
+            ToolChain::Nightly => "nightly".to_string(),
         }
     }
 }
