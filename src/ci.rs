@@ -279,11 +279,7 @@ impl TokioCIStep {
 
     pub(crate) fn features() -> Result<()> {
         let script = "cargo install cargo-hack";
-        std::process::Command::new("sh")
-            .arg("-c")
-            .arg(script)
-            .spawn()?
-            .wait()?;
+        Command::new("sh").arg("-c").arg(script).spawn()?.wait()?;
 
         let mut q = VecDeque::new();
         q.push_back(
@@ -312,10 +308,7 @@ impl TokioCIStep {
     pub(crate) fn fmt() -> Result<()> {
         // install clippy
         let script = "rustup component add rustfmt";
-        let mut child = std::process::Command::new("sh")
-            .arg("-c")
-            .arg(script)
-            .spawn()?;
+        let mut child = Command::new("sh").arg("-c").arg(script).spawn()?;
 
         child.wait()?;
 
@@ -326,7 +319,8 @@ impl TokioCIStep {
         fi        "#
         .trim_start()
         .trim_end();
-        std::process::Command::new("sh")
+        Command::new("sh")
+            .current_dir("tokio")
             .arg("-c")
             .arg(script)
             .spawn()?
@@ -337,11 +331,7 @@ impl TokioCIStep {
     pub(crate) fn clippy() -> Result<()> {
         // install clippy
         let script = "rustup component add clippy";
-        std::process::Command::new("sh")
-            .arg("-c")
-            .arg(script)
-            .spawn()?
-            .wait()?;
+        Command::new("sh").arg("-c").arg(script).spawn()?.wait()?;
         let mut q = VecDeque::new();
         q.push_back(TokioCIStageBuilder::new("cargo").clippy().build());
         Self::from((q, ToolChain::Stable)).run()
@@ -370,7 +360,9 @@ impl TokioCIStep {
     fn setup_toolchain(&mut self) -> Result<()> {
         let toolchain = self.toolchain;
         for stage in &mut self.stages {
-            stage.cmd.envs(vec![("RUSTUP_TOOLCHAIN", String::from(toolchain))]);
+            stage
+                .cmd
+                .envs(vec![("RUSTUP_TOOLCHAIN", String::from(toolchain))]);
         }
         Ok(())
     }
