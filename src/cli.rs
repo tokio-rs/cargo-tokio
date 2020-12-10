@@ -6,6 +6,5 @@ use structopt::StructOpt;
     about = "A tool to make your CI life easier locally"
 )]
 pub(crate) struct TokioCLI {
-    #[structopt(short)]
     pub step: Option<String>,
 }
