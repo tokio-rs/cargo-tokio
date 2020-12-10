@@ -1,6 +1,7 @@
 [package]
 name = "cargo-tokio"
 version = "0.1.0"
+license = "MIT"
 authors = ["Blas Rodriguez Irizar <rodrigblas@gmail.com>"]
 edition = "2018"
 
