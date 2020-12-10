@@ -3,15 +3,16 @@ mod cli;
 mod targets;
 
 use ci::TokioCIStep;
-use cli::TokioCLI;
+use cli::CargoTokio;
 
 use structopt::StructOpt;
 
 use std::io;
 
 pub fn run() -> io::Result<()> {
-    let cli = TokioCLI::from_args();
-    match cli.step.as_deref() {
+    let cli = CargoTokio::from_args();
+
+    match cli.step() {
         Some("test") => TokioCIStep::test_tokio_full(),
         Some("test-unstable") => TokioCIStep::test_tokio_full_unstable(),
         Some("miri") => TokioCIStep::miri(),
