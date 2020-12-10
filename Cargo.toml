@@ -4,6 +4,7 @@ version = "0.1.0"
 license = "MIT"
 authors = ["Blas Rodriguez Irizar <rodrigblas@gmail.com>"]
 edition = "2018"
+description = "Cargo Tokio CI tool"
 
 documentation = "https://docs.rs/cargo-tokio"
 
