@@ -1,5 +1,5 @@
 [package]
-name = "cargo-tokio-ci"
+name = "cargo-tokio"
 version = "0.1.0"
 authors = ["Blas Rodriguez Irizar <rodrigblas@gmail.com>"]
 edition = "2018"

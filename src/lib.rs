@@ -7,29 +7,23 @@ use cli::TokioCLI;
 
 use structopt::StructOpt;
 
-pub fn run() -> std::io::Result<()> {
+use std::io;
+
+pub fn run() -> io::Result<()> {
     let cli = TokioCLI::from_args();
-
-    match cli.step.as_str() {
-        "test" => TokioCIStep::test_tokio_full(),
-        "test-unstable" => TokioCIStep::test_tokio_full_unstable(),
-        "miri" => TokioCIStep::miri(),
-        "san" => TokioCIStep::san(),
-        "cross" => TokioCIStep::cross(),
-        "features" => TokioCIStep::features(),
-        "minrust" => TokioCIStep::minrust(),
-        "fmt" => TokioCIStep::fmt(),
-        "clippy" => TokioCIStep::clippy(),
-        "docs" => TokioCIStep::docs(),
-        "loom" => TokioCIStep::loom(),
+    match cli.step.as_deref() {
+        Some("test") => TokioCIStep::test_tokio_full(),
+        Some("test-unstable") => TokioCIStep::test_tokio_full_unstable(),
+        Some("miri") => TokioCIStep::miri(),
+        Some("san") => TokioCIStep::san(),
+        Some("cross") => TokioCIStep::cross(),
+        Some("features") => TokioCIStep::features(),
+        Some("minrust") => TokioCIStep::minrust(),
+        Some("fmt") => TokioCIStep::fmt(),
+        Some("clippy") => TokioCIStep::clippy(),
+        Some("docs") => TokioCIStep::docs(),
+        Some("loom") => TokioCIStep::loom(),
+        None => ci::run_all_steps(),
         _ => Err(std::io::ErrorKind::InvalidInput.into()),
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn bogus_test() {
-        assert_eq!(1, 1)
     }
 }

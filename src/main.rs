@@ -1,4 +1,4 @@
-use cargo_tokio_ci::run;
-fn main() {
-    run().unwrap();
+use std::io;
+fn main() -> io::Result<()> {
+    cargo_tokio::run()
 }

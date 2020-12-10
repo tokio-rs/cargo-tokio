@@ -393,3 +393,25 @@ impl From<ToolChain> for String {
         }
     }
 }
+
+pub fn run_all_steps() -> std::io::Result<()> {
+    let mut queue = VecDeque::from(vec![
+        TokioCIStep::test_tokio_full(),
+        TokioCIStep::test_tokio_full_unstable(),
+        TokioCIStep::miri(),
+        TokioCIStep::san(),
+        TokioCIStep::cross(),
+        TokioCIStep::features(),
+        TokioCIStep::minrust(),
+        TokioCIStep::fmt(),
+        TokioCIStep::clippy(),
+        TokioCIStep::docs(),
+        TokioCIStep::loom(),
+    ]);
+    while let Some(step) = queue.pop_front() {
+        if step.is_err() {
+            return step;
+        }
+    }
+    Ok(())
+}

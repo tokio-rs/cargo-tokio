@@ -7,5 +7,5 @@ use structopt::StructOpt;
 )]
 pub(crate) struct TokioCLI {
     #[structopt(short)]
-    pub step: String,
+    pub step: Option<String>,
 }
