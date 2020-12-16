@@ -39,7 +39,7 @@ different CI steps.
 
 ## Contributing
 Ideally this command should mirror any updates on the `.github/` directory on the
-[tokio](https://github.com/tokio-rs/tokio)crate. So if there's anything missing, feel free
+[tokio](https://github.com/tokio-rs/tokio) crate. So if there's anything missing, feel free
 to submit a PR.
 
 
